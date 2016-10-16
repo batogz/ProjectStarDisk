@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "algo.h"
 #include "heuristic.h"
 #include "game.h"
 #include "hashset.h"
 
-int game_size;
-int disk_groups;
+int8_t game_size;
+int8_t disk_groups;
+int no_states;
 
-void print_arr(int *arr)
+void print_arr(int8_t *arr)
 {
-    for (int i = 0; i < game_size; i++) {
+    for (int8_t i = 0; i < game_size; i++) {
         printf("%d", arr[i]);
     }
     printf("\n");
@@ -29,13 +31,18 @@ void print_sol(struct node *sol)
 
 int main()
 {
-    game_size = 10;
-    disk_groups = 3;
+    game_size = 17;
+    disk_groups = 4;
+    no_states = 0;
 
-    int big_disks[] =   {1, 3, 2, 1, 3, 4, 1, 2, 2, 1, 3};
-    int small_disks[] = {1, 2, 1, 0, 2, 2, 1, 3, 3, 3, 1};
+    //int8_t big_disks[] =   {1, 3, 2, 1, 3, 4, 1, 2, 2, 1, 3};
+    //int8_t small_disks[] = {1, 2, 1, 0, 2, 2, 1, 3, 3, 3, 1};
+    int8_t big_disks[] =   {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 2, 4};
+    int8_t small_disks[] = {0, 2, 1, 4, 2, 3, 2, 1, 3, 3, 3, 1, 1, 4, 2, 4, 4};
 
-    struct node *sol = a_star(small_disks, big_disks, h1);
+    struct node *sol = a_star(small_disks, big_disks, h2);
+    //struct node *sol = RBFS_wrapper(small_disks, big_disks, h2);
+
     if (!sol)
         printf("No solution\n");
     else
