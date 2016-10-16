@@ -1,7 +1,9 @@
+#include <stdint.h>
+
 #include "game.h"
 
 // returns 1 if the game is won and 0 otherwise
-int is_goal(int *small_disks)
+int8_t is_goal(int8_t *small_disks)
 {
     for (int i = 0; i < game_size; ++i) {
         int next = (i+1) % game_size;

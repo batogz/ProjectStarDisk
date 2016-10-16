@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "game.h"
 #include "hashset.h"
 
-static void print_array(int *arr)
+static void print_array(int8_t *arr)
 {
-    for (int i = 0; i < game_size; ++i) {
+    for (int8_t i = 0; i < game_size; ++i) {
         printf("%d", arr[i]);
     }
     printf("\n");
@@ -19,12 +20,12 @@ struct hashset *create_hashset(int size)
 
     set->cur_size = 0;
     set->max_size = size;
-    set->data = calloc(size, sizeof(int *));
+    set->data = calloc(size, sizeof(int8_t *));
 
     return set;
 }
 
-static unsigned long hash(int *state)
+static unsigned long hash(int8_t *state)
 {
     //djb2
     unsigned long hash = 5381;
@@ -49,14 +50,14 @@ static void rehash(struct hashset **set)
     *set = set2;
 }
 
-int *lookup(struct hashset *set, int *state)
+int8_t *lookup(struct hashset *set, int8_t *state)
 {
     if (set->max_size == 0)
         printf("ERROR?!?!?\n");
     int index = hash(state) % set->max_size;
 
     while (set->data[index]) {
-        if (memcmp(set->data[index], state, sizeof(int) * game_size) == 0)
+        if (memcmp(set->data[index], state, sizeof(int8_t) * game_size) == 0)
             return set->data[index];
         index = (index + 1) % set->max_size;
     }
@@ -64,17 +65,21 @@ int *lookup(struct hashset *set, int *state)
     return NULL;
 }
 
-void insert(struct hashset **set, int *state)
+int no_states;
+
+void insert(struct hashset **set, int8_t *state)
 {
     // note: insert doesn't check for duplicate elements (yet)
     // will want to perform lookup first (but it's slow for now so...)
     int index = hash(state) % (*set)->max_size;
 
-    while ((*set)->data[index])
+    while ((*set)->data[index]){
+        if((*set)->data[index] == state) return;
         index = (index + 1) % (*set)->max_size;
-
+    }
     (*set)->data[index] = state;
     ++((*set)->cur_size);
+    no_states++;
 
     if ( (double) (*set)->cur_size / (*set)->max_size > 0.8f) {
         rehash(set);

@@ -4,13 +4,13 @@
 struct hashset {
     int cur_size;
     int max_size;
-    int **data;
+    int8_t **data;
 };
 
 struct hashset *create_hashset(int size);
 
-void insert(struct hashset **set, int *state);
+void insert(struct hashset **set, int8_t *state);
 
-int *lookup(struct hashset *set, int *state);
+int8_t *lookup(struct hashset *set, int8_t *state);
 
 #endif

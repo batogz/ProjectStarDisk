@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "algo.h"
 #include "game.h"
 #include "hashset.h"
 
 
-static void print_array(int *arr)
+static void print_array(int8_t *arr)
 {
-    for (int i = 0; i < game_size; i++)
+    for (int8_t i = 0; i < game_size; i++)
         printf("%d", arr[i]);
     printf("\n");
 }
@@ -99,9 +100,9 @@ static struct node *queue_front(struct p_queue *queue)
     return node;
 }
 
-static int indexof(int *state, int needle)
+static int8_t indexof(int8_t *state, int8_t needle)
 {
-    for (int i = 0; i < game_size; i++) {
+    for (int8_t i = 0; i < game_size; i++) {
         if (state[i] == needle)
             return i;
     }
@@ -109,13 +110,13 @@ static int indexof(int *state, int needle)
     return -1;
 }
 
-static int *swap(int *state, int index1, int index2)
+static int8_t *swap(int8_t *state, int8_t index1, int8_t index2)
 {
-    int *ret = malloc(game_size * sizeof(int));
+    int8_t *ret = malloc(game_size * sizeof(int8_t));
     if (!ret)
         exit(EXIT_FAILURE);
 
-    memcpy(ret, state, game_size * sizeof(int));
+    memcpy(ret, state, game_size * sizeof(int8_t));
 
     ret[index1] = state[index2];
     ret[index2] = state[index1];
@@ -123,7 +124,7 @@ static int *swap(int *state, int index1, int index2)
     return ret;
 }
 
-struct node *make_node(int *state, struct node *parent, int (*h)(int *, int *))
+struct node *make_node(int8_t *state, struct node *parent, int8_t (*h)(int8_t *, int8_t *))
 {
     struct node *node = malloc(sizeof(struct node));
     if (!node)
@@ -141,13 +142,19 @@ struct node *make_node(int *state, struct node *parent, int (*h)(int *, int *))
 
     node->f = node->cost + node->heuristic;
 
+    //if(no_states % 1000 == 0){
+    //    printf("%d ", no_states);
+    //    printf("%d\n", node->cost);
+    //    print_array(state);
+    //}
+
     return node;
 }
 
-void expand(struct node *node, struct node **children, int big_disks[],
-        int (*h)(int *, int *))
+void expand(struct node *node, struct node **children, int8_t big_disks[],
+        int8_t (*h)(int8_t *, int8_t *))
 {
-    int index0 = node->index0;
+    int8_t index0 = node->index0;
 
     children[0] = make_node(
             swap(node->state, index0, index0 == 0 ? game_size - 1 : index0 - 1),
@@ -156,7 +163,7 @@ void expand(struct node *node, struct node **children, int big_disks[],
     children[1] = make_node(
             swap(node->state, index0, (index0 + 1) % game_size), node, h);
 
-    int jump = big_disks[index0];
+    int8_t jump = big_disks[index0];
     if (jump == 1)
         return;
 
@@ -170,7 +177,9 @@ void expand(struct node *node, struct node **children, int big_disks[],
 
 }
 
-struct node *a_star(int *state, int big_disks[], int (*h)(int *, int *))
+int no_states;
+
+struct node *a_star(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *))
 {
     struct hashset *set = create_hashset(3);
     struct p_queue *fringe = make_p_queue();
@@ -178,7 +187,7 @@ struct node *a_star(int *state, int big_disks[], int (*h)(int *, int *))
 
     struct node *cur_node;
     struct node *children[4] = {};
-    int num_children;
+    int8_t num_children;
     while ((cur_node = queue_front(fringe))) {
         // printf("Checking cost %d: ", cur_node->f);
         // print_array(cur_node->state);
@@ -203,8 +212,58 @@ struct node *a_star(int *state, int big_disks[], int (*h)(int *, int *))
             // printf("Queue:\n");
             // print_queue(fringe);
         }
+        //printf("cost: %d\n", cur_node->f);
     }
 
     // printf("No solution\n");
     return NULL;
+}
+
+struct node *RBFS_wrapper(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *))
+{
+    printf("RBFS_wrapper\n");
+    int depth = 0;
+    struct hashset *set = create_hashset(3);
+    struct node *cur_node = make_node(state, NULL, h);
+
+    return RBFS(cur_node, set, big_disks, h, depth);
+}
+
+struct node *RBFS(struct node *cur_node, struct hashset *set, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *), int depth)
+{
+    struct node *children[4] = {};
+    int8_t num_children;
+    int8_t best_node, low_h = 127;
+
+    insert(&set, cur_node->state);
+
+    if (is_goal(cur_node->state)) {
+            printf("Solution!\n");
+            free(set);
+            return cur_node;
+    }
+
+    if(depth > 10){
+        return RBFS(cur_node->parent, set, big_disks, h, depth - 1);
+    }
+
+    num_children = (big_disks[cur_node->index0] == 1) ? 2 : 4;
+
+    expand(cur_node, children, big_disks, h);
+
+    for (int8_t i = 0; i < num_children; ++i)
+    {
+        printf("low_h: %d children[i]->heuristic: %d\n", low_h, children[i]->heuristic);
+        if(low_h > children[i]->heuristic && !lookup(set, children[i]->state))
+        {
+            low_h = children[i]->heuristic;
+            best_node = i;
+        }
+    }
+    printf("best: %d\n", children[best_node]->heuristic);
+
+    if(low_h == 127){
+        return RBFS (cur_node->parent, set, big_disks, h, depth - 1);
+    }
+    return RBFS(children[best_node], set, big_disks, h, depth + 1);
 }
