@@ -30,16 +30,31 @@ void print_sol(struct node *sol)
     print_arr(sol->state);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    game_size = 17;
-    disk_groups = 4;
+    if (argc < 2) return 0;
+    game_size = atoi(argv[1]);;
+    disk_groups = sqrt(game_size - 1);
     no_states = 0;
+
+    int8_t big_disks[game_size];
+    int8_t small_disks[game_size];
+
+    char buf[game_size];
+    fgets(buf, game_size + 2, stdin);
+    for (int i = 0; i < game_size; ++i) {
+        big_disks[i] = buf[i] - '0';
+    }
+
+    fgets(buf, game_size + 2,  stdin);
+    for (int i = 0; i < game_size; ++i) {
+        small_disks[i] = buf[i] - '0';
+    }
 
     //int8_t big_disks[] =   {1, 3, 2, 1, 3, 4, 1, 2, 2, 1, 3};
     //int8_t small_disks[] = {1, 2, 1, 0, 2, 2, 1, 3, 3, 3, 1};
-    int8_t big_disks[] =   {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 2, 4};
-    int8_t small_disks[] = {0, 2, 1, 4, 2, 3, 2, 1, 3, 3, 3, 1, 1, 4, 2, 4, 4};
+    //int8_t big_disks[] =   {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 2, 4};
+    //int8_t small_disks[] = {3, 2, 3, 1, 4, 3, 4, 1, 0, 1, 2, 3, 2, 4, 4, 2, 1};
 
     struct node *sol = a_star(small_disks, big_disks, h2);
     //struct node *sol = RBFS_wrapper(small_disks, big_disks, h2);
@@ -48,4 +63,6 @@ int main()
         printf("No solution\n");
     else
         print_sol(sol);
+
+    return 0;
 }
