@@ -84,7 +84,7 @@ int up_heap(Heap *h){
     Heap_Level *p_l = h->insert_level->prev_level; //parent level
     int p_i = c_i/2; //parent index
     while (p_l != NULL){
-        if (c_l->data_array[c_i]->f >= p_l->data_array[p_i]->f){
+        if (c_l->data_array[c_i]->f <= p_l->data_array[p_i]->f){
             swap_nodes(c_l, c_i, p_l, p_i);
             c_l = p_l;
             c_i = p_i;            
@@ -106,14 +106,14 @@ int down_heap(Heap *h){
     while (c_l != NULL
         && c_l->data_array[lc_i] != NULL && c_l->data_array[rc_i] != NULL){
 
-        if (p_l->data_array[p_i] <= c_l->data_array[lc_i]
-         && c_l->data_array[rc_i] <= c_l->data_array[lc_i]){
+        if (p_l->data_array[p_i]->f >= c_l->data_array[lc_i]->f
+         && c_l->data_array[rc_i]->f >= c_l->data_array[lc_i]->f){
             
             swap_nodes(p_l, p_i, c_l, lc_i);
             p_i = lc_i;
         }
-        else if (p_l->data_array[p_i] <= c_l->data_array[rc_i] 
-              && c_l->data_array[lc_i] <= c_l->data_array[rc_i]){
+        else if (p_l->data_array[p_i]->f >= c_l->data_array[rc_i]->f 
+              && c_l->data_array[lc_i]->f >= c_l->data_array[rc_i]->f){
 
             swap_nodes(p_l, p_i, c_l, rc_i);
             p_i = rc_i;
@@ -140,7 +140,7 @@ int print_heap(Heap *h){
         printf("level: %d\n", p->level);        
         int sizeof_data_array = pow(2, p->level-1);
         for(int i = 0; i < sizeof_data_array; i++){
-            printf("%d ", *(p->data_array+i));
+            printf("%d ", (p->data_array[i] ? p->data_array[i]->f : 0));
         }
         printf("\n");
         p = p->next_level;
