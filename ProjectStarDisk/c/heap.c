@@ -9,7 +9,7 @@ Heap* create_heap(){
     h->head = malloc(sizeof(Heap_Level));
     if (h->head == NULL) exit(-1);
     h->head->level = 1;
-    h->head->data_array = calloc(1, sizeof(int));
+    h->head->data_array = calloc(1, sizeof(Node));
     if (h->head->data_array == NULL) exit(-1);
     h->head->next_level = NULL;
     
@@ -35,7 +35,7 @@ int delete_heap(Heap *h){
     return 0;
 }
 
-int add(Heap *h, int data){
+int add(Heap *h, Node data){
     h->insert_level->data_array[h->insert_index] = data;
     up_heap(h);
 
@@ -50,7 +50,7 @@ int add(Heap *h, int data){
         h->insert_level->next_level->prev_level = h->insert_level;
         h->insert_level = h->insert_level->next_level; 
         int sizeof_array = (int)pow(2, h->insert_level->level-1);       
-        h->insert_level->data_array = calloc(sizeof_array, sizeof(int));
+        h->insert_level->data_array = calloc(sizeof_array, sizeof(Node));
         h->insert_level->next_level = NULL;
         
         h->insert_index = 0;        
@@ -58,8 +58,8 @@ int add(Heap *h, int data){
     return 0;
 }
 
-int pop(Heap *h){
-    int head_data = h->head->data_array[0];
+Node pop(Heap *h){
+    Node head_data = h->head->data_array[0];
 
 
     if (h->insert_index-1 >= 0){    
@@ -72,7 +72,7 @@ int pop(Heap *h){
     }
 
     h->head->data_array[0] = h->insert_level->data_array[h->insert_index];
-    h->insert_level->data_array[h->insert_index] = 0;
+    h->insert_level->data_array[h->insert_index] = NULL;
     down_heap(h);
 
     return head_data;
@@ -83,8 +83,8 @@ int up_heap(Heap *h){
     int c_i = h->insert_index; //child index
     Heap_Level *p_l = h->insert_level->prev_level; //parent level
     int p_i = c_i/2; //parent index
-    while (p_l != NULL ){
-        if(c_l->data_array[c_i] >= p_l->data_array[p_i]){
+    while (p_l != NULL){
+        if (c_l->data_array[c_i]->f >= p_l->data_array[p_i]->f){
             swap(c_l, c_i, p_l, p_i);
             c_l = p_l;
             c_i = p_i;            
@@ -103,7 +103,9 @@ int down_heap(Heap *h){
     int lc_i = p_i*2; //left child index
     int rc_i = lc_i+1; //right child index
     
-    while (c_l != NULL){
+    while (c_l != NULL
+        && c_l->data_array[lc_i] != NULL && c_l->data_array[rc_i] != NULL){
+
         if (p_l->data_array[p_i] <= c_l->data_array[lc_i]
          && c_l->data_array[rc_i] <= c_l->data_array[lc_i]){
             

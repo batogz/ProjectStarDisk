@@ -6,6 +6,7 @@
 #include "algo.h"
 #include "game.h"
 #include "hashset.h"
+#include "heap.h"
 
 
 static void print_array(int8_t *arr)
