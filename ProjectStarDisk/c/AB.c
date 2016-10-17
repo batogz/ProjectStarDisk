@@ -14,10 +14,10 @@ int no_states;
 
 void print_arr(int8_t *arr)
 {
-    for (int8_t i = 0; i < game_size; i++) {
-        printf("%d", arr[i]);
+    for (int8_t i = 0; i < game_size - 1; i++) {
+        printf("%d ", arr[i]);
     }
-    printf("\n");
+    printf("%d\n",arr[game_size-1]);
 }
 
 void print_sol(struct node *sol)
@@ -40,15 +40,15 @@ int main(int argc, char *argv[])
     int8_t big_disks[game_size];
     int8_t small_disks[game_size];
 
-    char buf[game_size];
-    fgets(buf, game_size + 2, stdin);
-    for (int i = 0; i < game_size; ++i) {
-        big_disks[i] = buf[i] - '0';
+    char buf[game_size * 2 - 1];
+    fgets(buf, game_size * 2 + 10, stdin);
+    for (int i = 0; i < game_size * 2 - 1; i = i+2) {
+        big_disks[i/2] = buf[i] - '0';
     }
 
-    fgets(buf, game_size + 2,  stdin);
-    for (int i = 0; i < game_size; ++i) {
-        small_disks[i] = buf[i] - '0';
+    fgets(buf, game_size * 2+ 10,  stdin);
+    for (int i = 0; i < game_size * 2 - 1; i = i+2) {
+        small_disks[i/2] = buf[i] - '0';
     }
 
     //int8_t big_disks[] =   {1, 3, 2, 1, 3, 4, 1, 2, 2, 1, 3};
@@ -61,8 +61,10 @@ int main(int argc, char *argv[])
 
     if (!sol)
         printf("No solution\n");
-    else
+    else {
+        printf("Solution is\n");
         print_sol(sol);
+    }
 
     return 0;
 }
