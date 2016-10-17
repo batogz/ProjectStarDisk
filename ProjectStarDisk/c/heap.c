@@ -9,7 +9,7 @@ Heap* create_heap(){
     h->head = malloc(sizeof(Heap_Level));
     if (h->head == NULL) exit(-1);
     h->head->level = 1;
-    h->head->data_array = calloc(1, sizeof(int));
+    h->head->data_array = calloc(1, sizeof(struct node));
     if (h->head->data_array == NULL) exit(-1);
     h->head->next_level = NULL;
     
@@ -35,7 +35,7 @@ int delete_heap(Heap *h){
     return 0;
 }
 
-int add(Heap *h, int data){
+int add(Heap *h, struct node *data){
     h->insert_level->data_array[h->insert_index] = data;
     up_heap(h);
 
@@ -50,7 +50,7 @@ int add(Heap *h, int data){
         h->insert_level->next_level->prev_level = h->insert_level;
         h->insert_level = h->insert_level->next_level; 
         int sizeof_array = (int)pow(2, h->insert_level->level-1);       
-        h->insert_level->data_array = calloc(sizeof_array, sizeof(int));
+        h->insert_level->data_array = calloc(sizeof_array, sizeof(struct node));
         h->insert_level->next_level = NULL;
         
         h->insert_index = 0;        
@@ -58,8 +58,8 @@ int add(Heap *h, int data){
     return 0;
 }
 
-int pop(Heap *h){
-    int head_data = h->head->data_array[0];
+struct node* pop(Heap *h){
+    struct node *head_data = h->head->data_array[0];
 
 
     if (h->insert_index-1 >= 0){    
@@ -72,7 +72,7 @@ int pop(Heap *h){
     }
 
     h->head->data_array[0] = h->insert_level->data_array[h->insert_index];
-    h->insert_level->data_array[h->insert_index] = 0;
+    h->insert_level->data_array[h->insert_index] = NULL;
     down_heap(h);
 
     return head_data;
@@ -83,9 +83,9 @@ int up_heap(Heap *h){
     int c_i = h->insert_index; //child index
     Heap_Level *p_l = h->insert_level->prev_level; //parent level
     int p_i = c_i/2; //parent index
-    while (p_l != NULL ){
-        if(c_l->data_array[c_i] >= p_l->data_array[p_i]){
-            swap(c_l, c_i, p_l, p_i);
+    while (p_l != NULL){
+        if (c_l->data_array[c_i]->f >= p_l->data_array[p_i]->f){
+            swap_nodes(c_l, c_i, p_l, p_i);
             c_l = p_l;
             c_i = p_i;            
             p_l = p_l->prev_level;
@@ -103,17 +103,19 @@ int down_heap(Heap *h){
     int lc_i = p_i*2; //left child index
     int rc_i = lc_i+1; //right child index
     
-    while (c_l != NULL){
+    while (c_l != NULL
+        && c_l->data_array[lc_i] != NULL && c_l->data_array[rc_i] != NULL){
+
         if (p_l->data_array[p_i] <= c_l->data_array[lc_i]
          && c_l->data_array[rc_i] <= c_l->data_array[lc_i]){
             
-            swap(p_l, p_i, c_l, lc_i);
+            swap_nodes(p_l, p_i, c_l, lc_i);
             p_i = lc_i;
         }
         else if (p_l->data_array[p_i] <= c_l->data_array[rc_i] 
               && c_l->data_array[lc_i] <= c_l->data_array[rc_i]){
 
-            swap(p_l, p_i, c_l, rc_i);
+            swap_nodes(p_l, p_i, c_l, rc_i);
             p_i = rc_i;
         }
         p_l = c_l;
@@ -125,13 +127,13 @@ int down_heap(Heap *h){
     return 0;
 }
 
-int swap(Heap_Level *al, int ai, Heap_Level *bl, int bi){
-    int temp = al->data_array[ai];
+int swap_nodes(Heap_Level *al, int ai, Heap_Level *bl, int bi){
+    struct node *temp = al->data_array[ai];
     al->data_array[ai] = bl->data_array[bi];
     bl->data_array[bi] = temp;
     return 0;
 }
-
+/*
 int print_heap(Heap *h){
     Heap_Level *p = h->head;   
     while(p != NULL){
@@ -145,4 +147,4 @@ int print_heap(Heap *h){
     }
     return 0;
 }
-
+*/

@@ -6,6 +6,7 @@
 #include "algo.h"
 #include "game.h"
 #include "hashset.h"
+#include "heap.h"
 
 
 static void print_array(int8_t *arr)
@@ -15,7 +16,7 @@ static void print_array(int8_t *arr)
     printf("\n");
 }
 
-
+/*
 struct p_queue_node {
     struct node *node;
     struct p_queue_node *next;
@@ -99,6 +100,7 @@ static struct node *queue_front(struct p_queue *queue)
     free(old_node);
     return node;
 }
+*/
 
 static int8_t indexof(int8_t *state, int8_t needle)
 {
@@ -182,13 +184,16 @@ int no_states;
 struct node *a_star(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *))
 {
     struct hashset *set = create_hashset(3);
-    struct p_queue *fringe = make_p_queue();
-    add_to_queue(fringe, make_node(state, NULL, h));
+    //struct p_queue *fringe = make_p_queue();
+    Heap *fringe = create_heap();
+    //add_to_queue(fringe, make_node(state, NULL, h));
+    add(fringe, make_node(state, NULL, h));
 
     struct node *cur_node;
     struct node *children[4] = {};
     int8_t num_children;
-    while ((cur_node = queue_front(fringe))) {
+    //while ((cur_node = queue_front(fringe))) {
+    while ((cur_node = pop(fringe))) {
         // printf("Checking cost %d: ", cur_node->f);
         // print_array(cur_node->state);
 
@@ -206,7 +211,8 @@ struct node *a_star(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int
             expand(cur_node, children, big_disks, h);
 
             for (int i = 0; i < num_children; i++) {
-                add_to_queue(fringe, children[i]);
+                //add_to_queue(fringe, children[i]);
+                add(fringe, children[i]);
             }
 
             // printf("Queue:\n");

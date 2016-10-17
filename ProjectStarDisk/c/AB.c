@@ -6,6 +6,7 @@
 #include "heuristic.h"
 #include "game.h"
 #include "hashset.h"
+#include "heap.h"
 
 int8_t game_size;
 int8_t disk_groups;
