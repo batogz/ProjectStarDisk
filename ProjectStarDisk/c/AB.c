@@ -27,6 +27,7 @@ void print_sol(struct node *sol)
 
     print_sol(sol->parent);
     //printf("%d cost: ", sol->f);
+    fprintf(stderr, "H: %2d : Path %2d : Eval %2d : ", sol->heuristic, sol->cost, sol->f);
     print_arr(sol->state);
 }
 
@@ -51,19 +52,44 @@ int main(int argc, char *argv[])
         small_disks[i/2] = buf[i] - '0';
     }
 
+    //print_arr(big_disks);
+    //print_arr(small_disks);
+
     //int8_t big_disks[] =   {1, 3, 2, 1, 3, 4, 1, 2, 2, 1, 3};
     //int8_t small_disks[] = {1, 2, 1, 0, 2, 2, 1, 3, 3, 3, 1};
     //int8_t big_disks[] =   {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 2, 4};
     //int8_t small_disks[] = {3, 2, 3, 1, 4, 3, 4, 1, 0, 1, 2, 3, 2, 4, 4, 2, 1};
 
-    struct node *sol = a_star(small_disks, big_disks, h2);
     //struct node *sol = RBFS_wrapper(small_disks, big_disks, h2);
+    //int8_t big_disks[] =   {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1};
+    //int8_t small_disks[] = {2, 4, 3, 1, 4, 2, 3, 4, 0, 1, 3, 2, 4, 2, 1, 1, 3};
+
+    struct hashset *set = NULL;
+    struct node *sol = NULL;
+    if (disk_groups <= 100) {
+        set = create_hashset(311);
+        sol = a_star(set, small_disks, big_disks, h2);
+    }
 
     if (!sol)
         printf("No solution\n");
     else {
         printf("Solution is\n");
         print_sol(sol);
+        free(sol->state);
+        free(sol);
+    }
+
+    if (set) {
+        for (int i = 0; i < set->max_size; ++i) {
+            if (set->data[i]) {
+                if (set->data[i]->state != small_disks)
+                    free(set->data[i]->state);
+                free(set->data[i]);
+            }
+        }
+        free(set->data);
+        free(set);
     }
 
     return 0;

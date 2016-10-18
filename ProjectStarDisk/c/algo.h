@@ -2,6 +2,7 @@
 #define ALGO_H
 
 #include "hashset.h"
+
 /*
 struct node {
     int8_t heuristic;
@@ -13,7 +14,8 @@ struct node {
 };
 */
 
-struct node *a_star(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *));
+struct node *a_star(struct hashset *set, int8_t *state, 
+        int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *));
 
 struct node *RBFS_wrapper(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *));
 struct node *RBFS(struct node *cur_node, struct hashset *set, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *), int depth);

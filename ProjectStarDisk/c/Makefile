@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 
 CC=gcc
-CFLAGS=-Wall -std=c99
+CFLAGS=-Wall -std=c99 -g
 
 .PHONY: all clean
 

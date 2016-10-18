@@ -181,47 +181,40 @@ void expand(struct node *node, struct node **children, int8_t big_disks[],
 
 int no_states;
 
-struct node *a_star(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *))
+struct node *a_star(struct hashset *set, int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *))
 {
-    struct hashset *set = create_hashset(3);
-    //struct p_queue *fringe = make_p_queue();
     Heap *fringe = create_heap();
-    //add_to_queue(fringe, make_node(state, NULL, h));
     add(fringe, make_node(state, NULL, h));
 
     struct node *cur_node;
     struct node *children[4] = {};
     int8_t num_children;
-    //while ((cur_node = queue_front(fringe))) {
+    //int i = 0;
     while ((cur_node = pop(fringe))) {
-        // printf("Checking cost %d: ", cur_node->f);
-        // print_array(cur_node->state);
+        //if (i++ % 1000 == 0) fprintf(stderr, "%d\n", i);
 
         if (is_goal(cur_node->state)) {
-            // printf("Solution!\n");
-            free(set);
+            delete_heap(fringe);
             return cur_node;
         }
 
-        if (!lookup(set, cur_node->state)) {
-            insert(&set, cur_node->state);
+        if (!lookup(set, cur_node)) {
+            insert(set, cur_node);
 
             num_children = (big_disks[cur_node->index0] == 1) ? 2 : 4;
 
             expand(cur_node, children, big_disks, h);
 
             for (int i = 0; i < num_children; i++) {
-                //add_to_queue(fringe, children[i]);
                 add(fringe, children[i]);
             }
 
-            // printf("Queue:\n");
-            // print_queue(fringe);
+        } else {
+            free(cur_node->state);
+            free(cur_node);
         }
-        //printf("cost: %d\n", cur_node->f);
     }
 
-    // printf("No solution\n");
     return NULL;
 }
 
@@ -241,7 +234,7 @@ struct node *RBFS(struct node *cur_node, struct hashset *set, int8_t big_disks[]
     int8_t num_children;
     int8_t best_node, low_h = 127;
 
-    insert(&set, cur_node->state);
+    insert(set, cur_node);
 
     if (is_goal(cur_node->state)) {
             printf("Solution!\n");
@@ -260,7 +253,7 @@ struct node *RBFS(struct node *cur_node, struct hashset *set, int8_t big_disks[]
     for (int8_t i = 0; i < num_children; ++i)
     {
         printf("low_h: %d children[i]->heuristic: %d\n", low_h, children[i]->heuristic);
-        if(low_h > children[i]->heuristic && !lookup(set, children[i]->state))
+        if(low_h > children[i]->heuristic && !lookup(set, children[i]))
         {
             low_h = children[i]->heuristic;
             best_node = i;
