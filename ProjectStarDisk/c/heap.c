@@ -15,6 +15,7 @@ Heap* create_heap(){
     
     //sets heap data
     h->insert_level = h->head;
+    h->insert_level->prev_level = NULL;
     h->insert_index = 0;   
 
     return h;
@@ -22,12 +23,28 @@ Heap* create_heap(){
 
 int delete_heap(Heap *h){
     Heap_Level *p = h->head->next_level;
+    int sizeof_data_array = pow(2, h->head->level-1);
+    for(int i = 0; i < sizeof_data_array; i++){
+        free(h->head->data_array[i]->state);
+        free(h->head->data_array[i]);
+    }
     free(h->head->data_array);
     free(h->head);
     while (p->next_level != NULL){
+        sizeof_data_array = pow(2, p->level-1);
+        for(int i = 0; i < sizeof_data_array; i++){
+            free(p->data_array[i]->state);
+            free(p->data_array[i]);
+        }
         free(p->data_array);
         p = p->next_level;
         free(p->prev_level);
+    }
+    sizeof_data_array = pow(2, p->level-1);
+    for(int i = 0; i < sizeof_data_array; i++){
+        if (!p->data_array[i]) break;
+        free(p->data_array[i]->state);
+        free(p->data_array[i]);
     }
     free(p->data_array);
     free(p);
@@ -40,10 +57,9 @@ int add(Heap *h, struct node *data){
     up_heap(h);
 
     int sizeof_array = (int)pow(2, h->insert_level->level-1);
-    if ( h->insert_index+1 < sizeof_array){
-        h->insert_index++;    
-    }
-    else{
+    if ( h->insert_index + 1 < sizeof_array){
+        h->insert_index++;
+    } else {
         h->insert_level->next_level = malloc(sizeof(Heap_Level));
         if (h->insert_level->next_level == NULL) exit(-1);
         h->insert_level->next_level->level = h->insert_level->level+1;
@@ -52,8 +68,7 @@ int add(Heap *h, struct node *data){
         int sizeof_array = (int)pow(2, h->insert_level->level-1);       
         h->insert_level->data_array = calloc(sizeof_array, sizeof(struct node));
         h->insert_level->next_level = NULL;
-        
-        h->insert_index = 0;        
+        h->insert_index = 0;
     }
     return 0;
 }
@@ -67,6 +82,9 @@ struct node* pop(Heap *h){
     }
     else{
         h->insert_level = h->insert_level->prev_level;
+        free(h->insert_level->next_level->data_array);
+        free(h->insert_level->next_level);
+        h->insert_level->next_level = NULL;
 
         h->insert_index = (int)(pow(2, h->insert_level->level-1)-1);       
     }
@@ -133,7 +151,7 @@ int swap_nodes(Heap_Level *al, int ai, Heap_Level *bl, int bi){
     bl->data_array[bi] = temp;
     return 0;
 }
-/*
+
 int print_heap(Heap *h){
     Heap_Level *p = h->head;   
     while(p != NULL){
@@ -147,4 +165,4 @@ int print_heap(Heap *h){
     }
     return 0;
 }
-*/
+

@@ -55,5 +55,19 @@ int8_t h2(int8_t *big_disks, int8_t *small_disks)
         last_num = small_disks[i];
     }
     //if(2*(disk_groups * (disk_groups - 1) - pairs) + out_of_order < 4)print_array(small_disks);
-    return 2*(disk_groups * (disk_groups - 1) - pairs) + out_of_order;
+    return (disk_groups * (disk_groups - 1) - pairs) + out_of_order;
+}
+
+int8_t h3(int8_t *big_disks, int8_t *small_disks)
+{
+    int count = 0;
+    for (int i = 0; i < game_size; ++i) {
+        int next = (i+1) % game_size;
+        if (small_disks[i] != small_disks[next] && 
+                small_disks[i] + 1 != small_disks[next] &&
+                small_disks[next] != 0)
+            count++;
+    }
+
+    return count;
 }
