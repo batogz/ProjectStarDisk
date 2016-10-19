@@ -66,9 +66,12 @@ int main(int argc, char *argv[])
 
     struct hashset *set = NULL;
     struct node *sol = NULL;
-    if (disk_groups <= 100) {
+    if (disk_groups >= 100) {
         set = create_hashset(311);
         sol = a_star(set, small_disks, big_disks, h2);
+    }
+    else {
+        sol = O_IDA_search(small_disks, big_disks, h2);
     }
 
     if (!sol)
@@ -76,8 +79,8 @@ int main(int argc, char *argv[])
     else {
         printf("Solution is\n");
         print_sol(sol);
-        free(sol->state);
-        free(sol);
+        //free(sol->state);
+        //free(sol);
     }
 
     if (set) {
