@@ -4,7 +4,7 @@
 #include "ttable.h"
 #include "game.h"
 
-#define TTABLE_SIZE 4096
+#define TTABLE_SIZE 65536
 
 static int64_t **zobrist_table;
 
@@ -20,6 +20,22 @@ struct ttable *init_ttable()
     struct ttable *t = malloc(sizeof(struct ttable));
     t->data = calloc(TTABLE_SIZE, sizeof(struct ttable_node));
     return t;
+}
+
+void destroy_ttable(struct ttable *t)
+{
+    for (int i = 0; i < game_size; ++i) {
+        free(zobrist_table[i]);
+    }
+    free(zobrist_table);
+    for (int i = 0; i < TTABLE_SIZE; ++i) {
+        if (t->data[i]) {
+            free(t->data[i]->state);
+            free(t->data[i]);
+        }
+    }
+    free(t->data);
+    free(t);
 }
 
 static int64_t zobrist_hash(int8_t *state)

@@ -79,8 +79,6 @@ int main(int argc, char *argv[])
     else {
         printf("Solution is\n");
         print_sol(sol);
-        //free(sol->state);
-        //free(sol);
     }
 
     if (set) {
@@ -93,6 +91,15 @@ int main(int argc, char *argv[])
         }
         free(set->data);
         free(set);
+        sol = NULL;
+    }
+
+    struct node *n = sol;
+    while (n) {
+        struct node *n1 = n->parent;
+        if (n->state != small_disks) free(n->state);
+        free(n);
+        n = n1;
     }
 
     return 0;

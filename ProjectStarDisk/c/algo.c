@@ -8,6 +8,7 @@
 #include "game.h"
 #include "hashset.h"
 #include "heap.h"
+#include "ttable.h"
 
 static void print_array(int8_t *arr)
 {
@@ -15,92 +16,6 @@ static void print_array(int8_t *arr)
         printf("%d", arr[i]);
     printf("\n");
 }
-
-/*
-struct p_queue_node {
-    struct node *node;
-    struct p_queue_node *next;
-    struct p_queue_node *prev;
-};
-
-struct p_queue {
-    struct p_queue_node *head;
-    struct p_queue_node *tail;
-};
-
-
-static void print_queue(struct p_queue *queue)
-{
-    struct p_queue_node *node = queue->head;
-    while (node) {
-        printf("\t Cost %d: ", node->node->f);
-        print_array(node->node->state);
-        node = node->next;
-    }
-}
-
-
-static struct p_queue *make_p_queue()
-{
-    struct p_queue *queue = malloc(sizeof(struct p_queue));
-    queue->head = NULL;
-    queue->tail = NULL;
-    return queue;
-}
-
-static void add_to_queue(struct p_queue *queue, struct node *node)
-{
-    // printf("Adding child of cost %d: ", node->f);
-    // print_array(node->state);
-    struct p_queue_node *qnode = malloc(sizeof(struct p_queue_node));
-    qnode->node = node;
-
-    if (!queue->head) {
-        queue->head = qnode;
-        queue->tail = qnode;
-        qnode->next = NULL;
-        qnode->prev = NULL;
-        return;
-    }
-
-    struct p_queue_node *search = queue->tail;
-    while (search) {
-        if (search->node->f <= node->f) {
-            if (search->next)
-                search->next->prev = qnode;
-            qnode->next = search->next;
-            search->next = qnode;
-            qnode->prev = search;
-            if (queue->tail == search)
-                queue->tail = qnode;
-            return;
-        }
-
-        search = search->prev;
-    }
-
-    // adding to beginning of queue
-    qnode->next = queue->head;
-    queue->head->prev = qnode;
-    qnode->prev = NULL;
-    queue->head = qnode;
-}
-
-
-static struct node *queue_front(struct p_queue *queue)
-{
-    if (!queue->head)
-        return NULL;
-
-    struct node *node = queue->head->node;
-    struct p_queue_node *old_node = queue->head;
-    queue->head = queue->head->next;
-    if (queue->head)
-        queue->head->prev = NULL;
-    free(old_node);
-    return node;
-}
-*/
 
 static int8_t indexof(int8_t *state, int8_t needle)
 {
@@ -218,41 +133,68 @@ struct node *a_star(struct hashset *set, int8_t *state, int8_t big_disks[], int8
     return NULL;
 }
 
-int8_t IDA_star(struct node *n, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *), int8_t threshold, struct node ** sol)
+static int8_t IDA_star(struct node *n, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *), 
+        int8_t threshold, struct node ** sol, struct ttable *t)
 {
     int8_t minf = 127;
+
+    ttable_insert(t, n, threshold);
 
     if (is_goal(n->state)){
         *sol = n;
         return 0;
     }
-    if (n->f > threshold)
+    if (n->f > threshold) {
         return n->f;
+    }
     struct node *children[4] = {};
     int8_t num_children = (big_disks[n->index0] == 1) ? 2 : 4;
     expand(n, children, big_disks, h);
     for(int i = 0; i < num_children; i++) {
-        int8_t cf = IDA_star(children[i], big_disks, h, threshold, sol);
-        if (cf == 0)
+        struct ttable_node *ln = ttable_lookup(t, children[i]);
+
+        if (ln
+            && memcmp(ln->state, children[i]->state, sizeof(int8_t) * game_size) == 0
+            //&& ln->threshold == threshold
+            && ln->path_cost <= n->cost
+           ) {
+            free(children[i]->state);
+            free(children[i]);
+            continue;
+        }
+
+        int8_t cf = IDA_star(children[i], big_disks, h, threshold, sol, t);
+        if (cf == 0) {
+            //goal
+            for (int j = i + 1; j < num_children; j++) {
+                free(children[j]->state);
+                free(children[j]);
+            }
             return 0;
+        }
         if (cf<minf)
             minf = cf;
+        free(children[i]->state);
+        free(children[i]);
     }
     return minf;
 }
 
 struct node *O_IDA_search(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *))
 {
+    struct ttable *t = init_ttable();
     struct node *n = make_node(state, NULL, h);
     struct node *sol = n;
     int8_t threshold = n->heuristic;
     bool done = false;
     while(!done){
-        int8_t newt = IDA_star(n, big_disks, h, threshold, &sol);
+        fprintf(stderr, "Threshold %d\n", threshold);
+        int8_t newt = IDA_star(n, big_disks, h, threshold, &sol, t);
         if(newt==0)
             done = true;
         else threshold = newt;
     }
+    destroy_ttable(t);
     return sol;
 }
 
