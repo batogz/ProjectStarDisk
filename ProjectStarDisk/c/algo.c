@@ -158,8 +158,8 @@ static uint8_t IDA_star(struct node *n, uint8_t big_disks[], uint8_t (*h)(uint8_
             && ln->threshold == threshold
             //&& ln->path_cost <= n->cost
            ) {
-            if ((deeper && ln->path_cost <= n->cost) || 
-                    (!deeper && ln->threshold == threshold)) {
+            if ((!deeper && ln->path_cost <= n->cost) || 
+                    (deeper && ln->threshold == threshold)) {
                 free(children[i]->state);
                 free(children[i]);
                 continue;
@@ -193,7 +193,7 @@ struct node *O_IDA_search(uint8_t *state, uint8_t big_disks[],
     uint8_t threshold = n->heuristic;
     bool done = false;
     while(!done){
-        //fprintf(stderr, "Threshold %d\n", threshold);
+        fprintf(stderr, "Threshold %d\n", threshold);
         uint8_t newt = IDA_star(n, big_disks, h, threshold, &sol, t, deeper);
         if(newt==0)
             done = true;
