@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "algo.h"
 #include "game.h"
 #include "hashset.h"
 #include "heap.h"
-
 
 static void print_array(int8_t *arr)
 {
@@ -218,51 +218,43 @@ struct node *a_star(struct hashset *set, int8_t *state, int8_t big_disks[], int8
     return NULL;
 }
 
-struct node *RBFS_wrapper(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *))
+int8_t IDA_star(struct node *n, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *), int8_t threshold, struct node ** sol)
 {
-    printf("RBFS_wrapper\n");
-    int depth = 0;
-    struct hashset *set = create_hashset(3);
-    struct node *cur_node = make_node(state, NULL, h);
+    int8_t minf = 127;
 
-    return RBFS(cur_node, set, big_disks, h, depth);
-}
-
-struct node *RBFS(struct node *cur_node, struct hashset *set, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *), int depth)
-{
+    if (is_goal(n->state)){
+        *sol = n;
+        return 0;
+    }
+    if (n->f > threshold)
+        return n->f;
     struct node *children[4] = {};
-    int8_t num_children;
-    int8_t best_node, low_h = 127;
-
-    insert(set, cur_node);
-
-    if (is_goal(cur_node->state)) {
-            printf("Solution!\n");
-            free(set);
-            return cur_node;
+    int8_t num_children = (big_disks[n->index0] == 1) ? 2 : 4;
+    expand(n, children, big_disks, h);
+    for(int i = 0; i < num_children; i++) {
+        int8_t cf = IDA_star(children[i], big_disks, h, threshold, sol);
+        if (cf == 0)
+            return 0;
+        if (cf<minf)
+            minf = cf;
     }
-
-    if(depth > 10){
-        return RBFS(cur_node->parent, set, big_disks, h, depth - 1);
-    }
-
-    num_children = (big_disks[cur_node->index0] == 1) ? 2 : 4;
-
-    expand(cur_node, children, big_disks, h);
-
-    for (int8_t i = 0; i < num_children; ++i)
-    {
-        printf("low_h: %d children[i]->heuristic: %d\n", low_h, children[i]->heuristic);
-        if(low_h > children[i]->heuristic && !lookup(set, children[i]))
-        {
-            low_h = children[i]->heuristic;
-            best_node = i;
-        }
-    }
-    printf("best: %d\n", children[best_node]->heuristic);
-
-    if(low_h == 127){
-        return RBFS (cur_node->parent, set, big_disks, h, depth - 1);
-    }
-    return RBFS(children[best_node], set, big_disks, h, depth + 1);
+    return minf;
 }
+
+struct node *O_IDA_search(int8_t *state, int8_t big_disks[], int8_t (*h)(int8_t *, int8_t *))
+{
+    struct node *n = make_node(state, NULL, h);
+    struct node *sol = n;
+    int8_t threshold = n->heuristic;
+    bool done = false;
+    while(!done){
+        int8_t newt = IDA_star(n, big_disks, h, threshold, &sol);
+        if(newt==0)
+            done = true;
+        else threshold = newt;
+    }
+    return sol;
+}
+
+
+
