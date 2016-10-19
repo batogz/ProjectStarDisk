@@ -22,4 +22,6 @@ void ttable_insert(struct ttable *, struct node *, int threshold);
 
 struct ttable_node *ttable_lookup(struct ttable *, struct node *);
 
+void destroy_ttable(struct ttable *);
+
 #endif
