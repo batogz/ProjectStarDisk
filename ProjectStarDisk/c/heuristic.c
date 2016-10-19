@@ -3,24 +3,24 @@
 
 #include "game.h"
 
-int8_t game_size;
+uint8_t game_size;
 
-static void print_array(int8_t *arr)
+static void print_array(uint8_t *arr)
 {
-    for (int8_t i = 0; i < game_size; i++)
+    for (uint8_t i = 0; i < game_size; i++)
         printf("%d", arr[i]);
     printf("\n");
 }
 
-int8_t h1(int8_t *big_disks, int8_t *small_disks)
+uint8_t h1(uint8_t *big_disks, uint8_t *small_disks)
 {
-    int8_t pairs = 0;
-    int8_t out_of_order_pairs = 0;
+    uint8_t pairs = 0;
+    uint8_t out_of_order_pairs = 0;
 
-    int8_t saw_pair = (small_disks[game_size - 1] == small_disks[0]);
-    int8_t last_pair = saw_pair ? small_disks[0] : -1;
+    uint8_t saw_pair = (small_disks[game_size - 1] == small_disks[0]);
+    uint8_t last_pair = saw_pair ? small_disks[0] : -1;
 
-    for (int8_t i = 0; i < game_size; ++i) {
+    for (uint8_t i = 0; i < game_size; ++i) {
         if (small_disks[i] == small_disks[(i+1) % game_size]) {
             pairs++;
 
@@ -38,13 +38,13 @@ int8_t h1(int8_t *big_disks, int8_t *small_disks)
     return disk_groups * (disk_groups - 1) - pairs + 2*out_of_order_pairs;
 }
 
-int8_t h2(int8_t *big_disks, int8_t *small_disks)
+uint8_t h2(uint8_t *big_disks, uint8_t *small_disks)
 {
-    int8_t pairs = 0;
+    uint8_t pairs = 0;
 
-    int8_t out_of_order = 0;
-    int8_t last_num = 0;
-    for (int8_t i = 0; i < game_size; ++i) {
+    uint8_t out_of_order = 0;
+    uint8_t last_num = 0;
+    for (uint8_t i = 0; i < game_size; ++i) {
         if (small_disks[i] == small_disks[(i+1) % game_size]) {
             pairs++;
         }
@@ -58,7 +58,7 @@ int8_t h2(int8_t *big_disks, int8_t *small_disks)
     return (disk_groups * (disk_groups - 1) - pairs) + out_of_order;
 }
 
-int8_t h3(int8_t *big_disks, int8_t *small_disks)
+uint8_t h3(uint8_t *big_disks, uint8_t *small_disks)
 {
     int count = 0;
     for (int i = 0; i < game_size; ++i) {

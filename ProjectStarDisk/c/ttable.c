@@ -4,7 +4,7 @@
 #include "ttable.h"
 #include "game.h"
 
-#define TTABLE_SIZE 65536
+#define TTABLE_SIZE 33554432
 
 static int64_t **zobrist_table;
 
@@ -38,7 +38,7 @@ void destroy_ttable(struct ttable *t)
     free(t);
 }
 
-static int64_t zobrist_hash(int8_t *state)
+static int64_t zobrist_hash(uint8_t *state)
 {
     int64_t hash = zobrist_table[0][state[0]];
     for (int i = 1; i < game_size; ++i) {
@@ -50,8 +50,8 @@ static int64_t zobrist_hash(int8_t *state)
 static struct ttable_node *create_ttable_node(struct node *node, int threshold)
 {
     struct ttable_node *tn = malloc(sizeof(struct ttable_node));
-    tn->state = malloc(sizeof(int8_t) * game_size);
-    memcpy(tn->state, node->state, sizeof(int8_t) * game_size);
+    tn->state = malloc(sizeof(uint8_t) * game_size);
+    memcpy(tn->state, node->state, sizeof(uint8_t) * game_size);
     tn->path_cost = node->cost;
     tn->threshold = threshold;
 

@@ -6,7 +6,7 @@
 /* Transposition table */
 
 struct ttable_node {
-    int8_t *state;
+    uint8_t *state;
     int path_cost;
     int threshold;
 };

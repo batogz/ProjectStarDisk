@@ -6,9 +6,9 @@
 #include "game.h"
 #include "hashset.h"
 
-static void print_array(int8_t *arr)
+static void print_array(uint8_t *arr)
 {
-    for (int8_t i = 0; i < game_size; ++i) {
+    for (uint8_t i = 0; i < game_size; ++i) {
         printf("%d", arr[i]);
     }
     printf("\n");
@@ -25,7 +25,7 @@ struct hashset *create_hashset(int size)
     return set;
 }
 
-static unsigned long hash(int8_t *state)
+static unsigned long hash(uint8_t *state)
 {
     //djb2
     unsigned long hash = 5381;
@@ -58,7 +58,7 @@ struct node *lookup(struct hashset *set, struct node *node)
     int index = hash(node->state) % set->max_size;
 
     while (set->data[index]) {
-        if (memcmp(set->data[index]->state, node->state, sizeof(int8_t) * game_size) == 0)
+        if (memcmp(set->data[index]->state, node->state, sizeof(uint8_t) * game_size) == 0)
             return set->data[index];
         index = (index + 1) % set->max_size;
     }
