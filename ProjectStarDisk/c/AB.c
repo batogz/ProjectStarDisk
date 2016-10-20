@@ -8,13 +8,13 @@
 #include "hashset.h"
 #include "heap.h"
 
-int8_t game_size;
-int8_t disk_groups;
+uint8_t game_size;
+uint8_t disk_groups;
 int no_states;
 
-void print_arr(int8_t *arr)
+void print_arr(uint8_t *arr)
 {
-    for (int8_t i = 0; i < game_size - 1; i++) {
+    for (int i = 0; i < game_size - 1; i++) {
         printf("%d ", arr[i]);
     }
     printf("%d\n",arr[game_size-1]);
@@ -27,7 +27,7 @@ void print_sol(struct node *sol)
 
     print_sol(sol->parent);
     //printf("%d cost: ", sol->f);
-    fprintf(stderr, "H: %2d : Path %2d : Eval %2d : ", sol->heuristic, sol->cost, sol->f);
+    //fprintf(stderr, "H: %2d : Path %2d : Eval %2d : ", sol->heuristic, sol->cost, sol->f);
     print_arr(sol->state);
 }
 
@@ -38,8 +38,8 @@ int main(int argc, char *argv[])
     disk_groups = sqrt(game_size - 1);
     no_states = 0;
 
-    int8_t big_disks[game_size];
-    int8_t small_disks[game_size];
+    uint8_t big_disks[game_size];
+    uint8_t small_disks[game_size];
 
     char buf[game_size * 2 - 1];
     fgets(buf, game_size * 2 + 10, stdin);
@@ -55,23 +55,25 @@ int main(int argc, char *argv[])
     //print_arr(big_disks);
     //print_arr(small_disks);
 
-    //int8_t big_disks[] =   {1, 3, 2, 1, 3, 4, 1, 2, 2, 1, 3};
-    //int8_t small_disks[] = {1, 2, 1, 0, 2, 2, 1, 3, 3, 3, 1};
-    //int8_t big_disks[] =   {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 2, 4};
-    //int8_t small_disks[] = {3, 2, 3, 1, 4, 3, 4, 1, 0, 1, 2, 3, 2, 4, 4, 2, 1};
+    //uint8_t big_disks[] =   {1, 3, 2, 1, 3, 4, 1, 2, 2, 1, 3};
+    //uint8_t small_disks[] = {1, 2, 1, 0, 2, 2, 1, 3, 3, 3, 1};
+    //uint8_t big_disks[] =   {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 2, 4};
+    //uint8_t small_disks[] = {3, 2, 3, 1, 4, 3, 4, 1, 0, 1, 2, 3, 2, 4, 4, 2, 1};
 
     //struct node *sol = RBFS_wrapper(small_disks, big_disks, h2);
-    //int8_t big_disks[] =   {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1};
-    //int8_t small_disks[] = {2, 4, 3, 1, 4, 2, 3, 4, 0, 1, 3, 2, 4, 2, 1, 1, 3};
+    //uint8_t big_disks[] =   {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1};
+    //uint8_t small_disks[] = {2, 4, 3, 1, 4, 2, 3, 4, 0, 1, 3, 2, 4, 2, 1, 1, 3};
 
     struct hashset *set = NULL;
     struct node *sol = NULL;
-    if (disk_groups >= 100) {
+    if (disk_groups <= 3) {
         set = create_hashset(311);
         sol = a_star(set, small_disks, big_disks, h2);
     }
-    else {
-        sol = O_IDA_search(small_disks, big_disks, h2);
+    else if (disk_groups == 4) {
+        sol = O_IDA_search(small_disks, big_disks, h2, 0);
+    } else {
+        sol = O_IDA_search(small_disks, big_disks, h2, 1);
     }
 
     if (!sol)

@@ -7,12 +7,12 @@
 
 
 struct node {
-    int8_t heuristic;
-    int8_t cost;
-    int8_t f;  // heuristic + cost
+    uint8_t heuristic;
+    uint8_t cost;
+    uint8_t f;  // heuristic + cost
     struct node *parent;
-    int8_t *state;
-    int8_t index0;
+    uint8_t *state;
+    uint8_t index0;
 };
 
 typedef struct Heap_Level{
